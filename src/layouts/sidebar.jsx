@@ -8,22 +8,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { CircleUser, Menu, Package2 } from "lucide-react";
+import { CircleUser, Menu, MessageCircle } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { navItems } from "../App";
 
 const Layout = () => {
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+    <div className="grid min-h-screen w-full md:grid-cols-[300px_1fr]">
       <Sidebar />
       <div className="flex flex-col">
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6 lg:h-[60px]">
           <MobileSidebar />
-          <div className="w-full flex-1">{/* Add nav bar content here! */}</div>
-          <UserDropdown />
+          <div className="flex flex-1 items-center gap-4">
+            <UserAvatar />
+            <div>
+              <h2 className="text-lg font-semibold">Chat Name</h2>
+              <p className="text-sm text-muted-foreground">Online</p>
+            </div>
+          </div>
+          <ChatActions />
         </header>
-        <main className="flex-grow p-4 overflow-auto">
+        <main className="flex-1 overflow-auto p-4">
           <Outlet />
         </main>
       </div>
@@ -34,21 +41,20 @@ const Layout = () => {
 const Sidebar = () => (
   <div className="hidden border-r bg-muted/40 md:block">
     <div className="flex h-full max-h-screen flex-col gap-2">
-      <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+      <div className="flex h-14 items-center border-b px-6 lg:h-[60px]">
         <NavLink to="/" className="flex items-center gap-2 font-semibold">
-          <Package2 className="h-6 w-6" />
-          <span>Acme Inc</span>
+          <MessageCircle className="h-6 w-6" />
+          <span>Telegram Clone</span>
         </NavLink>
       </div>
-      <div className="flex-1">
-        <nav className="grid items-start px-2 text-sm font-medium lg:px-4 gap-2">
-          {navItems.map((item) => (
-            <SidebarNavLink key={item.to} to={item.to}>
-              {item.icon}
-              {item.title}
-            </SidebarNavLink>
-          ))}
-        </nav>
+      <div className="px-6 py-2">
+        <Input placeholder="Search chats..." />
+      </div>
+      <nav className="flex-1 overflow-auto px-4">
+        <ChatList />
+      </nav>
+      <div className="border-t p-4">
+        <UserMenu />
       </div>
     </div>
   </div>
@@ -57,61 +63,84 @@ const Sidebar = () => (
 const MobileSidebar = () => (
   <Sheet>
     <SheetTrigger asChild>
-      <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+      <Button variant="outline" size="icon" className="md:hidden">
         <Menu className="h-5 w-5" />
         <span className="sr-only">Toggle navigation menu</span>
       </Button>
     </SheetTrigger>
-    <SheetContent side="left" className="flex flex-col">
-      <nav className="grid gap-2 text-lg font-medium">
-        <NavLink
-          to="/"
-          className="flex items-center gap-2 text-lg font-semibold mb-4"
-        >
-          <Package2 className="h-6 w-6" />
-          <span className="sr-only">Acme Inc</span>
-        </NavLink>
-        {navItems.map((item) => (
-          <SidebarNavLink key={item.to} to={item.to}>
-            {item.title}
-          </SidebarNavLink>
-        ))}
+    <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+      <nav className="flex flex-col gap-4">
+        <div className="flex items-center gap-2 border-b pb-4">
+          <MessageCircle className="h-6 w-6" />
+          <span className="font-semibold">Telegram Clone</span>
+        </div>
+        <Input placeholder="Search chats..." />
+        <ChatList />
       </nav>
     </SheetContent>
   </Sheet>
 );
 
-const UserDropdown = () => (
+const ChatList = () => (
+  <div className="space-y-2 py-4">
+    {[...Array(10)].map((_, i) => (
+      <NavLink
+        key={i}
+        to={`/chat/${i + 1}`}
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-4 rounded-lg px-4 py-2 transition-colors hover:bg-accent",
+            isActive && "bg-accent"
+          )
+        }
+      >
+        <UserAvatar />
+        <div className="flex-1 overflow-hidden">
+          <p className="truncate font-medium">User {i + 1}</p>
+          <p className="truncate text-sm text-muted-foreground">
+            Last message preview...
+          </p>
+        </div>
+      </NavLink>
+    ))}
+  </div>
+);
+
+const UserAvatar = () => (
+  <div className="relative">
+    <div className="h-10 w-10 rounded-full bg-muted" />
+    <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background bg-green-500" />
+  </div>
+);
+
+const UserMenu = () => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
-      <Button variant="secondary" size="icon" className="rounded-full">
-        <CircleUser className="h-5 w-5" />
-        <span className="sr-only">Toggle user menu</span>
+      <Button variant="ghost" className="w-full justify-start gap-2">
+        <UserAvatar />
+        <span>User Name</span>
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end">
+    <DropdownMenuContent align="end" className="w-[200px]">
       <DropdownMenuLabel>My Account</DropdownMenuLabel>
       <DropdownMenuSeparator />
+      <DropdownMenuItem>Profile</DropdownMenuItem>
       <DropdownMenuItem>Settings</DropdownMenuItem>
-      <DropdownMenuItem>Support</DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem>Logout</DropdownMenuItem>
+      <DropdownMenuItem>Log out</DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
 );
 
-const SidebarNavLink = ({ to, children }) => (
-  <NavLink
-    to={to}
-    className={({ isActive }) =>
-      cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary text-muted-foreground",
-        isActive && "text-primary bg-muted",
-      )
-    }
-  >
-    {children}
-  </NavLink>
+const ChatActions = () => (
+  <div className="flex items-center gap-2">
+    {navItems.map((item) => (
+      <Button key={item.title} size="icon" variant="ghost">
+        {item.icon}
+        <span className="sr-only">{item.title}</span>
+      </Button>
+    ))}
+  </div>
 );
 
 export default Layout;
