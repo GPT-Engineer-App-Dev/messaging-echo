@@ -27,7 +27,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-60px)]">
+    <div className="flex flex-col h-full">
       <ScrollArea className="flex-1 p-4">
         {messages.map((message) => (
           <div
